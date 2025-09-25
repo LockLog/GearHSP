@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bloqueos de Agenda</title>
+    <title>Sistema de Registro de Bloqueos de Agenda</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -159,6 +159,14 @@
             background-color: #e67e22;
         }
 
+        .btn-info {
+            background-color: var(--primary);
+        }
+
+        .btn-info:hover {
+            background-color: var(--primary-dark);
+        }
+
         .login-form {
             max-width: 400px;
             margin: 0 auto;
@@ -307,6 +315,17 @@
         .estado-modificado { background: #f4ecf7; color: #8e44ad; }
         .estado-anulado { background: #f2f3f4; color: #566573; }
 
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .role-admin { background: #fdedec; color: #e74c3c; }
+        .role-user { background: #e8f4fd; color: #2980b9; }
+
         .modal {
             display: none;
             position: fixed;
@@ -332,7 +351,7 @@
 
         .modal-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
@@ -367,6 +386,16 @@
             border-bottom: none;
         }
 
+        .user-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .user-actions .btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
         @media (max-width: 768px) {
             .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
@@ -399,6 +428,10 @@
             .records-table th, .records-table td {
                 padding: 8px 10px;
             }
+            
+            .user-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -406,49 +439,61 @@
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1>Registro de Bloqueos de Agenda</h1>
-                <p>Registro y Gestión de Bloqueos de Agenda</p>
+                <h1>Sistema de Registro de Bloqueos de Agenda</h1>
+                <p>Registro y gestión de bloqueos de agenda</p>
             </div>
             
             <div class="content">
-                <!-- Formulario de Login/Registro -->
+                <!-- Formulario de Login/Registro Simplificado -->
                 <div id="loginForm" class="form-container active">
-                    <div class="login-tabs">
-                        <div class="login-tab active" data-tab="login">Iniciar Sesión</div>
-                        <div class="login-tab" data-tab="register">Crear Usuario</div>
-                    </div>
-                    
-                    <!-- Login -->
-                    <div id="loginTab" class="login-form">
+                    <div class="login-form">
+                        <h2 style="text-align: center; margin-bottom: 20px; color: var(--primary);">Iniciar Sesión</h2>
+                        
                         <form id="login">
                             <div class="form-group">
-                                <label for="email">Correo Electrónico</label>
-                                <input type="email" id="email" required>
+                                <label for="username">Usuario</label>
+                                <input type="text" id="username" required placeholder="Ingrese su nombre de usuario">
                             </div>
                             <div class="form-group">
                                 <label for="password">Contraseña</label>
-                                <input type="password" id="password" required>
+                                <input type="password" id="password" required placeholder="Ingrese su contraseña">
                             </div>
                             <button type="submit" class="btn btn-block">Iniciar Sesión</button>
                         </form>
+                        
+                        <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                            <p style="color: var(--gray); margin-bottom: 10px;">¿No tienes una cuenta?</p>
+                            <button id="showRegister" class="btn btn-success">Crear Nueva Cuenta</button>
+                        </div>
                     </div>
-                    
-                    <!-- Registro de nuevo usuario -->
-                    <div id="registerTab" class="login-form" style="display: none;">
+                </div>
+                
+                <!-- Formulario de Registro Simplificado -->
+                <div id="registerForm" class="form-container">
+                    <div class="login-form">
+                        <h2 style="text-align: center; margin-bottom: 20px; color: var(--primary);">Crear Nueva Cuenta</h2>
+                        
                         <form id="register">
                             <div class="form-group">
-                                <label for="regEmail">Correo Electrónico</label>
-                                <input type="email" id="regEmail" required>
+                                <label for="regUsername">Usuario</label>
+                                <input type="text" id="regUsername" required placeholder="Elija un nombre de usuario">
+                            </div>
+                            <div class="form-group">
+                                <label for="regEmail">Email</label>
+                                <input type="email" id="regEmail" required placeholder="Ingrese su email">
                             </div>
                             <div class="form-group">
                                 <label for="regPassword">Contraseña</label>
-                                <input type="password" id="regPassword" required minlength="6">
+                                <input type="password" id="regPassword" required minlength="4" placeholder="Mínimo 4 caracteres">
                             </div>
                             <div class="form-group">
                                 <label for="regConfirmPassword">Confirmar Contraseña</label>
-                                <input type="password" id="regConfirmPassword" required>
+                                <input type="password" id="regConfirmPassword" required placeholder="Repita la contraseña">
                             </div>
-                            <button type="submit" class="btn btn-success btn-block">Crear Usuario</button>
+                            <div class="btn-group" style="display: flex; gap: 10px;">
+                                <button type="button" id="backToLogin" class="btn btn-danger" style="flex: 1;">Cancelar</button>
+                                <button type="submit" class="btn btn-success" style="flex: 2;">Crear Cuenta</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -459,7 +504,7 @@
                         <div>
                             <strong id="userName">Usuario</strong> | 
                             <span id="userEmail">usuario@ejemplo.com</span>
-                            <span id="userRole" style="margin-left: 10px; padding: 2px 8px; background: #e8f4fd; border-radius: 12px; font-size: 0.8rem;"></span>
+                            <span id="userRole" class="role-badge role-user" style="margin-left: 10px;"></span>
                         </div>
                         <button id="logoutBtn" class="btn btn-danger">Cerrar Sesión</button>
                     </div>
@@ -474,12 +519,12 @@
                     <div id="successAlert" class="alert alert-success"></div>
                     <div id="errorAlert" class="alert alert-error"></div>
                     
-                    <!-- Formulario de Registro -->
+                    <!-- Formulario de Registro de Ausencias -->
                     <div id="registerTab" class="form-container active">
                         <form id="absenceForm">
                             <div class="grid-3">
                                 <div class="form-group">
-                                    <label for="motivo">Motivo de Bloqueo</label>
+                                    <label for="motivo">Motivo del Bloqueo</label>
                                     <select id="motivo" required>
                                         <option value="">Seleccione un motivo</option>
                                         <option value="Permiso Administrativo">Permiso Administrativo</option>
@@ -540,7 +585,7 @@
                             
                             <div class="form-group">
                                 <label for="detalle">Detalle del Bloqueo</label>
-                                <textarea id="detalle" placeholder="Describa los detalles del Bloqueo..." required></textarea>
+                                <textarea id="detalle" placeholder="Describa los detalles del bloqueo..." required></textarea>
                             </div>
                             
                             <div class="form-group">
@@ -548,7 +593,7 @@
                                 <textarea id="reporte" placeholder="Información adicional del reporte..."></textarea>
                             </div>
                             
-                            <button type="submit" class="btn btn-success btn-block">Registrar Bloqueo</button>
+                            <button type="submit" class="btn btn-success btn-block">Registrar Solicitud de Bloqueo</button>
                         </form>
                     </div>
                     
@@ -585,6 +630,7 @@
                         <table class="records-table">
                             <thead>
                                 <tr>
+                                    <th>Usuario</th>
                                     <th>Email</th>
                                     <th>Rol</th>
                                     <th>Fecha Creación</th>
@@ -635,6 +681,38 @@
         </div>
     </div>
 
+    <!-- Modal para gestionar usuarios -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="userModalTitle">Agregar Usuario</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="modalUsername">Usuario</label>
+                    <input type="text" id="modalUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalEmail">Email</label>
+                    <input type="email" id="modalEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalPassword">Contraseña</label>
+                    <input type="password" id="modalPassword" placeholder="Dejar vacío para no cambiar">
+                </div>
+                <div class="form-group">
+                    <label for="modalRole">Rol</label>
+                    <select id="modalRole" required>
+                        <option value="user">Usuario</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success btn-block">Guardar Usuario</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Configuración de Supabase
         const SUPABASE_URL = 'https://aniqjtpsyswvochrclto.supabase.co';
@@ -645,11 +723,14 @@
         
         // Elementos del DOM
         const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
         const dashboard = document.getElementById('dashboard');
         const login = document.getElementById('login');
-        const registerForm = document.getElementById('register');
+        const register = document.getElementById('register');
         const absenceForm = document.getElementById('absenceForm');
         const logoutBtn = document.getElementById('logoutBtn');
+        const showRegisterBtn = document.getElementById('showRegister');
+        const backToLoginBtn = document.getElementById('backToLogin');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.form-container');
         const successAlert = document.getElementById('successAlert');
@@ -663,16 +744,19 @@
         const searchInput = document.getElementById('searchInput');
         const fechaRegistroInput = document.getElementById('fechaRegistro');
         const estadoModal = document.getElementById('estadoModal');
-        const closeModal = document.querySelector('.close-modal');
+        const closeModal = document.querySelectorAll('.close-modal');
         const confirmarEstadoBtn = document.getElementById('confirmarEstado');
         const usersTab = document.getElementById('usersTab');
         const usersBody = document.getElementById('usersBody');
         const addUserBtn = document.getElementById('addUserBtn');
-        const loginTabs = document.querySelectorAll('.login-tab');
+        const userModal = document.getElementById('userModal');
+        const userForm = document.getElementById('userForm');
+        const userModalTitle = document.getElementById('userModalTitle');
         
         // Variables globales
         let currentUser = null;
         let currentAusenciaId = null;
+        let editingUserId = null;
         
         // Establecer fecha y hora actual por defecto
         const now = new Date();
@@ -680,35 +764,80 @@
         const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
         fechaRegistroInput.value = localISOTime;
         
-        // Manejo de pestañas de login/registro
-        loginTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                
-                loginTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                document.getElementById('loginTab').style.display = tabId === 'login' ? 'block' : 'none';
-                document.getElementById('registerTab').style.display = tabId === 'register' ? 'block' : 'none';
-            });
+        // Navegación entre login y registro
+        showRegisterBtn.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        });
+        
+        backToLoginBtn.addEventListener('click', () => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
         });
         
         // Verificar si el usuario ya está autenticado
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                showDashboard(session.user);
+            const userData = localStorage.getItem('currentUser');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+                showDashboard(currentUser);
                 loadEspecialidades();
                 loadRecords();
                 checkUserRole();
             }
         }
         
-        // Registrar nuevo usuario
-        registerForm.addEventListener('submit', async (e) => {
+        // Sistema de login simplificado
+        login.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                // Buscar usuario en la tabla de usuarios
+                const { data: users, error } = await supabase
+                    .from('usuarios')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('password', password) // En producción, usaría hash
+                    .single();
+                
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        throw new Error('Usuario o contraseña incorrectos');
+                    }
+                    throw error;
+                }
+                
+                if (!users) {
+                    throw new Error('Usuario o contraseña incorrectos');
+                }
+                
+                // Actualizar último login
+                await supabase
+                    .from('usuarios')
+                    .update({ ultimo_login: new Date().toISOString() })
+                    .eq('id', users.id);
+                
+                currentUser = users;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                showDashboard(currentUser);
+                loadEspecialidades();
+                loadRecords();
+                checkUserRole();
+                
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+        
+        // Registrar nuevo usuario
+        register.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
@@ -718,103 +847,81 @@
                 return;
             }
             
-            if (password.length < 6) {
-                showError('La contraseña debe tener al menos 6 caracteres');
+            if (password.length < 4) {
+                showError('La contraseña debe tener al menos 4 caracteres');
                 return;
             }
             
             try {
-                const { data, error } = await supabase.auth.signUp({
-                    email: email,
-                    password: password
-                });
+                // Verificar si el usuario ya existe
+                const { data: existingUser } = await supabase
+                    .from('usuarios')
+                    .select('id')
+                    .eq('username', username)
+                    .single();
+                
+                if (existingUser) {
+                    throw new Error('El nombre de usuario ya está en uso');
+                }
+                
+                // Crear nuevo usuario
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .insert([
+                        {
+                            username: username,
+                            email: email,
+                            password: password, // En producción, usar hash
+                            rol: 'user',
+                            fecha_creacion: new Date().toISOString()
+                        }
+                    ])
+                    .select()
+                    .single();
                 
                 if (error) throw error;
                 
                 showSuccess('Usuario creado exitosamente. Ya puede iniciar sesión.');
-                registerForm.reset();
-                
-                // Cambiar a pestaña de login
-                loginTabs.forEach(t => t.classList.remove('active'));
-                document.querySelector('[data-tab="login"]').classList.add('active');
-                document.getElementById('loginTab').style.display = 'block';
-                document.getElementById('registerTab').style.display = 'none';
+                register.reset();
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
                 
             } catch (error) {
                 showError('Error al crear usuario: ' + error.message);
             }
         });
         
-        // Manejo del login
-        login.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
-                if (error) throw error;
-                
-                currentUser = data.user;
-                showDashboard(data.user);
-                loadEspecialidades();
-                loadRecords();
-                checkUserRole();
-                
-            } catch (error) {
-                showError('Error al iniciar sesión: ' + error.message);
-            }
-        });
-        
         // Verificar rol de usuario
-        async function checkUserRole() {
-            try {
-                const { data, error } = await supabase
-                    .from('usuarios')
-                    .select('rol')
-                    .eq('id', currentUser.id)
-                    .single();
-                
-                if (error && error.code !== 'PGRST116') throw error;
-                
-                const rol = data ? data.rol : 'usuario';
-                userRole.textContent = rol === 'admin' ? 'Administrador' : 'Usuario';
-                
-                // Mostrar pestaña de gestión de usuarios solo para admin
-                if (rol === 'admin') {
-                    usersTab.style.display = 'block';
-                    loadUsers();
-                } else {
-                    usersTab.style.display = 'none';
-                }
-                
-            } catch (error) {
-                console.error('Error verificando rol:', error);
-                userRole.textContent = 'Usuario';
+        function checkUserRole() {
+            const rol = currentUser.rol;
+            userRole.textContent = rol === 'admin' ? 'Administrador' : 'Usuario';
+            userRole.className = `role-badge role-${rol}`;
+            
+            // Mostrar pestaña de gestión de usuarios solo para admin
+            if (rol === 'admin') {
+                usersTab.style.display = 'block';
+                loadUsers();
+            } else {
                 usersTab.style.display = 'none';
             }
         }
         
         // Mostrar dashboard después del login
         function showDashboard(user) {
-            loginForm.classList.remove('active');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'none';
             dashboard.style.display = 'block';
-            userName.textContent = user.email.split('@')[0];
+            userName.textContent = user.username;
             userEmail.textContent = user.email;
         }
         
         // Cerrar sesión
         logoutBtn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            dashboard.style.display = 'none';
-            loginForm.classList.add('active');
-            login.reset();
+            localStorage.removeItem('currentUser');
             currentUser = null;
+            dashboard.style.display = 'none';
+            loginForm.style.display = 'block';
+            login.reset();
         });
         
         // Manejo de pestañas del dashboard
@@ -985,21 +1092,21 @@
                             fecha_fin: fechaFin,
                             detalle: detalle,
                             reporte: reporte,
-                            usuario: currentUser.email
+                            usuario: currentUser.username
                         }
                     ]);
                 
                 if (error) throw error;
                 
-                showSuccess('Bloqueo registrado exitosamente');
+                showSuccess('Ausencia registrada exitosamente');
                 absenceForm.reset();
                 
                 // Restablecer fecha de registro a la actual
                 fechaRegistroInput.value = localISOTime;
                 
             } catch (error) {
-                console.error('Error registrando el bloqueo:', error);
-                showError('Error al registrar el bloqueo: ' + error.message);
+                console.error('Error registrando ausencia:', error);
+                showError('Error al registrar la ausencia: ' + error.message);
             }
         });
         
@@ -1016,7 +1123,7 @@
                 recordsBody.innerHTML = '';
                 
                 if (data.length === 0) {
-                    recordsBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No hay registros de bloqueos de agenda</td></tr>';
+                    recordsBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No hay registros de ausencias</td></tr>';
                     return;
                 }
                 
@@ -1078,9 +1185,12 @@
             estadoModal.style.display = 'flex';
         };
         
-        // Cerrar modal
-        closeModal.addEventListener('click', () => {
-            estadoModal.style.display = 'none';
+        // Cerrar modales
+        closeModal.forEach(btn => {
+            btn.addEventListener('click', () => {
+                estadoModal.style.display = 'none';
+                userModal.style.display = 'none';
+            });
         });
         
         // Confirmar cambio de estado
@@ -1110,7 +1220,7 @@
                             ausencia_id: currentAusenciaId,
                             estado_anterior: '', // Podríamos capturar el estado anterior
                             estado_nuevo: nuevoEstado,
-                            usuario: currentUser.email,
+                            usuario: currentUser.username,
                             comentario: comentario,
                             fecha_cambio: new Date().toISOString()
                         }
@@ -1165,6 +1275,116 @@
             }
         }
         
+        // Gestión de usuarios
+        addUserBtn.addEventListener('click', () => {
+            editingUserId = null;
+            userModalTitle.textContent = 'Agregar Usuario';
+            userForm.reset();
+            userModal.style.display = 'flex';
+        });
+        
+        // Editar usuario
+        window.editarUsuario = async function(userId) {
+            try {
+                const { data: user, error } = await supabase
+                    .from('usuarios')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+                
+                if (error) throw error;
+                
+                editingUserId = userId;
+                userModalTitle.textContent = 'Editar Usuario';
+                document.getElementById('modalUsername').value = user.username;
+                document.getElementById('modalEmail').value = user.email;
+                document.getElementById('modalRole').value = user.rol;
+                document.getElementById('modalPassword').value = '';
+                userModal.style.display = 'flex';
+                
+            } catch (error) {
+                showError('Error al cargar usuario: ' + error.message);
+            }
+        };
+        
+        // Eliminar usuario
+        window.eliminarUsuario = async function(userId) {
+            if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
+                try {
+                    const { error } = await supabase
+                        .from('usuarios')
+                        .delete()
+                        .eq('id', userId);
+                    
+                    if (error) throw error;
+                    
+                    showSuccess('Usuario eliminado exitosamente');
+                    loadUsers();
+                    
+                } catch (error) {
+                    showError('Error al eliminar usuario: ' + error.message);
+                }
+            }
+        };
+        
+        // Guardar usuario (crear o editar)
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('modalUsername').value;
+            const email = document.getElementById('modalEmail').value;
+            const password = document.getElementById('modalPassword').value;
+            const role = document.getElementById('modalRole').value;
+            
+            try {
+                if (editingUserId) {
+                    // Editar usuario existente
+                    const updateData = {
+                        username: username,
+                        email: email,
+                        rol: role
+                    };
+                    
+                    if (password) {
+                        updateData.password = password;
+                    }
+                    
+                    const { error } = await supabase
+                        .from('usuarios')
+                        .update(updateData)
+                        .eq('id', editingUserId);
+                    
+                    if (error) throw error;
+                    
+                    showSuccess('Usuario actualizado exitosamente');
+                    
+                } else {
+                    // Crear nuevo usuario
+                    const { error } = await supabase
+                        .from('usuarios')
+                        .insert([
+                            {
+                                username: username,
+                                email: email,
+                                password: password,
+                                rol: role,
+                                fecha_creacion: new Date().toISOString()
+                            }
+                        ]);
+                    
+                    if (error) throw error;
+                    
+                    showSuccess('Usuario creado exitosamente');
+                }
+                
+                userModal.style.display = 'none';
+                loadUsers();
+                
+            } catch (error) {
+                showError('Error al guardar usuario: ' + error.message);
+            }
+        });
+        
         // Cargar usuarios (solo para admin)
         async function loadUsers() {
             try {
@@ -1178,7 +1398,7 @@
                 usersBody.innerHTML = '';
                 
                 if (!data || data.length === 0) {
-                    usersBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados</td></tr>';
+                    usersBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados</td></tr>';
                     return;
                 }
                 
@@ -1186,15 +1406,20 @@
                     const row = document.createElement('tr');
                     const fechaCreacion = new Date(usuario.fecha_creacion).toLocaleDateString('es-ES');
                     const ultimoLogin = usuario.ultimo_login ? new Date(usuario.ultimo_login).toLocaleString('es-ES') : 'Nunca';
+                    const roleClass = usuario.rol === 'admin' ? 'role-admin' : 'role-user';
                     
                     row.innerHTML = `
+                        <td>${usuario.username}</td>
                         <td>${usuario.email}</td>
-                        <td>${usuario.rol}</td>
+                        <td><span class="role-badge ${roleClass}">${usuario.rol}</span></td>
                         <td>${fechaCreacion}</td>
                         <td>${ultimoLogin}</td>
-                        <td>
+                        <td class="user-actions">
                             <button class="btn btn-warning" onclick="editarUsuario('${usuario.id}')">Editar</button>
-                            <button class="btn btn-danger" onclick="eliminarUsuario('${usuario.id}')">Eliminar</button>
+                            ${usuario.id !== currentUser.id ? 
+                                `<button class="btn btn-danger" onclick="eliminarUsuario('${usuario.id}')">Eliminar</button>` : 
+                                '<button class="btn btn-danger" disabled>Eliminar</button>'
+                            }
                         </td>
                     `;
                     
@@ -1282,7 +1507,7 @@
         // Inicializar la aplicación
         checkAuth();
         
-        console.log('Sistema de bloqueos de agenda mejorado inicializado');
+        console.log('Sistema de ausencias médicas inicializado');
     </script>
 </body>
 </html>
