@@ -717,9 +717,25 @@
         // Configuración de Supabase
         const SUPABASE_URL = 'https://aniqjtpsyswvochrclto.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuaXFqdHBzeXN3dm9jaHJjbHRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MTAwMTAsImV4cCI6MjA3NDM4NjAxMH0.9t6jqSs98AI4Drs4xp-_vlYU2OymnDR-ML6Fsy-aEnU';
+
+        // Configuración mejorada del cliente Supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false
+    },
+    db: {
+        schema: 'public'
+    },
+    global: {
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY
+        }
+    }
+});
         
-        // Inicializar Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // Elementos del DOM
         const loginForm = document.getElementById('loginForm');
@@ -787,52 +803,80 @@
             }
         }
         
-        // Sistema de login simplificado
-        login.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            try {
-                // Buscar usuario en la tabla de usuarios
-                const { data: users, error } = await supabase
-                    .from('usuarios')
-                    .select('*')
-                    .eq('username', username)
-                    .eq('password', password) // En producción, usaría hash
-                    .single();
-                
-                if (error) {
-                    if (error.code === 'PGRST116') {
-                        throw new Error('Usuario o contraseña incorrectos');
-                    }
-                    throw error;
-                }
-                
-                if (!users) {
-                    throw new Error('Usuario o contraseña incorrectos');
-                }
-                
-                // Actualizar último login
-                await supabase
-                    .from('usuarios')
-                    .update({ ultimo_login: new Date().toISOString() })
-                    .eq('id', users.id);
-                
-                currentUser = users;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                showDashboard(currentUser);
-                loadEspecialidades();
-                loadRecords();
-                checkUserRole();
-                
-            } catch (error) {
-                showError(error.message);
-            }
-        });
+// SISTEMA DE LOGIN COMPLETO CORREGIDO
+login.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    
+    // Validación básica
+    if (!username || !password) {
+        showError('Por favor, complete todos los campos');
+        return;
+    }
+    
+    // Mostrar loading
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Verificando...';
+    submitBtn.disabled = true;
+    
+    try {
+        // Consulta corregida
+        const { data: user, error } = await supabase
+            .from('usuarios')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password)
+            .eq('activo', true)
+            .single();
         
+        if (error) {
+            // Manejo específico de errores
+            if (error.code === 'PGRST116') {
+                throw new Error('Usuario o contraseña incorrectos');
+            } else if (error.message.includes('406')) {
+                throw new Error('Error de configuración del servidor');
+            } else {
+                throw new Error('Error de conexión: ' + error.message);
+            }
+        }
+        
+        if (!user) {
+            throw new Error('Usuario o contraseña incorrectos');
+        }
+        
+        // Actualizar último login
+        await supabase
+            .from('usuarios')
+            .update({ 
+                ultimo_login: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id);
+        
+        // Guardar usuario en localStorage
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        showSuccess(`Bienvenido, ${user.username}!`);
+        
+        // Cargar dashboard
+        showDashboard(user);
+        loadEspecialidades();
+        loadRecords();
+        checkUserRole();
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        showError(error.message);
+    } finally {
+        // Restaurar botón
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
         // Registrar nuevo usuario
         register.addEventListener('submit', async (e) => {
             e.preventDefault();
