@@ -1096,6 +1096,13 @@ login.addEventListener('submit', async (e) => {
                 return 'Desconocida';
             }
         }
+
+// USAR FUNCIÓN PERSONALIZADA
+const { data, error } = await supabase
+    .rpc('autenticar_usuario', {
+        p_username: username,
+        p_password: password
+    });
         
         // Registrar ausencia
         absenceForm.addEventListener('submit', async (e) => {
