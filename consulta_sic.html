@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referencia y Contrarreferencia</title>
+    <style>
+        :root {
+            --azul-primario: #2c3e50;
+            --azul-secundario: #3498db;
+            --gris-claro: #ecf0f1;
+            --gris-oscuro: #7f8c8d;
+            --naranja: #e67e22;
+            --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--azul-primario);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--azul-primario), var(--azul-secundario));
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: var(--sombra);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--sombra);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            background-color: var(--azul-primario);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-container {
+            display: flex;
+            margin-top: 0.5rem;
+        }
+        
+        input[type="text"] {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            width: 200px;
+        }
+        
+        button {
+            background-color: var(--naranja);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #d35400;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gris-claro);
+        }
+        
+        th {
+            background-color: var(--gris-claro);
+            color: var(--azul-primario);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e8f4fc;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            list-style: none;
+        }
+        
+        .pagination li {
+            margin: 0 0.25rem;
+        }
+        
+        .pagination a {
+            display: inline-block;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gris-claro);
+            border-radius: 4px;
+            color: var(--azul-primario);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .pagination a:hover {
+            background-color: var(--gris-claro);
+        }
+        
+        .pagination a.active {
+            background-color: var(--naranja);
+            color: white;
+            border-color: var(--naranja);
+        }
+        
+        footer {
+            background-color: var(--azul-primario);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gris-oscuro);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .search-container {
+                width: 100%;
+                margin-top: 1rem;
+            }
+            
+            input[type="text"] {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Referencia y Contrarreferencia</h1>
+        <p>Información de archivo "Base Visaciones"</p>
+				<div class="btn-toolbar mb-2 mb-md-0">
+			<a href="dashboard.php" class="btn btn-sm btn-outline-primary">
+				<i class="fas fa-arrow-left me-1"></i>Volver a Gear
+			</a>
+		</div>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>Visación de Interconsultas</h2>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Buscar...">
+                    <button id="search-btn">Buscar</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th>RUT</th>
+                            <th>Folio</th>
+                            <th>Apellido paterno </th>
+                            <th>Apellido materno</th>
+                            <th>Nombres</th>
+                            <th>Estado</th>
+                            <th>Especialidad</th>
+                            <th>Fecha entrada</th>
+                            <th>Prioridad</th>
+                            <th>Criterio</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" class="loading">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-container">
+                <ul class="pagination" id="pagination">
+                    <li><a href="#" class="active">1</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 - Todos los derechos reservados</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL de la hoja de cálculo pública (formato CSV)
+            //https://docs.google.com/spreadsheets/d/e/2PACX-1vSQdnDt69AidRmmOl2E6u0wDfSC8v5dYqiSQGrKqYwcsbTJszSeDOOJIMmzcvOadQ/pubhtml?gid=741882930&single=true
+            const sheetId = '2PACX-1vSQdnDt69AidRmmOl2E6u0wDfSC8v5dYqiSQGrKqYwcsbTJszSeDOOJIMmzcvOadQ';
+            const csvUrl = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=csv`;
+            
+            const tableBody = document.querySelector('#data-table tbody');
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            const pagination = document.getElementById('pagination');
+            
+            let allData = [];
+            let currentPage = 1;
+            const rowsPerPage = 25;
+            
+            // Función para cargar los datos desde Google Sheets
+            function loadData() {
+                fetch(csvUrl)
+                    .then(response => response.text())
+                    .then(data => {
+                        // Parsear el CSV
+                        const rows = data.split('\n');
+                        const headers = rows[0].split(',');
+                        
+                        // Encontrar los índices de las columnas que necesitamos (C, D, E, F, G, H, J, L)
+                        // Nota: Las columnas en CSV son 0-indexed, por lo que:
+                        // C=2, D=3, E=4, F=5, G=6, H=7, J=9, L=11
+                        const neededColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                        
+                        allData = [];
+                        for (let i = 1; i < rows.length; i++) {
+                            const cells = rows[i].split(',');
+                            if (cells.length > Math.max(...neededColumns)) {
+                                const rowData = neededColumns.map(index => cells[index] || '');
+                                allData.push(rowData);
+                            }
+                        }
+                        
+                        renderTable();
+                        setupPagination();
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar los datos:', error);
+                        tableBody.innerHTML = '<tr><td colspan="8">Error al cargar los datos. Por favor, intente nuevamente más tarde.</td></tr>';
+                    });
+            }
+            
+            // Función para renderizar la tabla con los datos
+            function renderTable() {
+                tableBody.innerHTML = '';
+                
+                // Aplicar filtro de búsqueda si existe
+                const searchTerm = searchInput.value.toLowerCase();
+                let filteredData = allData;
+                
+                if (searchTerm) {
+                    filteredData = allData.filter(row => 
+                        row.some(cell => cell.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                // Calcular datos para la página actual
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const paginatedData = filteredData.slice(start, end);
+                
+                if (paginatedData.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8">No se encontraron resultados</td></tr>';
+                    return;
+                }
+                
+                // Llenar la tabla con los datos
+                paginatedData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            }
+            
+            // Configurar la paginación
+            function setupPagination() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredData = searchTerm ? 
+                    allData.filter(row => row.some(cell => cell.toLowerCase().includes(searchTerm))) : 
+                    allData;
+                
+                const pageCount = Math.ceil(filteredData.length / rowsPerPage);
+                
+                pagination.innerHTML = '';
+                for (let i = 1; i <= pageCount; i++) {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.textContent = i;
+                    if (i === currentPage) {
+                        a.classList.add('active');
+                    }
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentPage = i;
+                        renderTable();
+                        updatePagination();
+                    });
+                    li.appendChild(a);
+                    pagination.appendChild(li);
+                }
+            }
+            
+            // Actualizar el estado activo de la paginación
+            function updatePagination() {
+                const pages = pagination.querySelectorAll('a');
+                pages.forEach((a, index) => {
+                    if (index + 1 === currentPage) {
+                        a.classList.add('active');
+                    } else {
+                        a.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Event listeners
+            searchBtn.addEventListener('click', function() {
+                currentPage = 1;
+                renderTable();
+                setupPagination();
+            });
+            
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    currentPage = 1;
+                    renderTable();
+                    setupPagination();
+                }
+            });
+            
+            // Cargar los datos iniciales
+            loadData();
+        });
+    </script>
+</body>
+</html>
